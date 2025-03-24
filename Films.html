@@ -9,6 +9,64 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        @keyframes colorTransition {
+            0% { color: black; }
+            50% { color: #ff0000; }
+            100% { color: black; }
+        }
+        
+        .animated-title {
+            animation: colorTransition 3s infinite ease-in-out;
+        }
+        
+        .hearts-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1; /* Changed from 999 to -1 so hearts appear behind content */
+            overflow: hidden;
+        }
+        
+        @keyframes heartBeat {
+            0% {
+                transform: scale(0.1) rotate(0deg);
+                opacity: 0;
+            }
+            20% {
+                transform: scale(1) rotate(10deg);
+                opacity: 1;
+            }
+            80% {
+                transform: scale(1) rotate(10deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.2) rotate(20deg);
+                opacity: 0;
+            }
+        }
+        
+        .floating-heart {
+            position: absolute;
+            color: #ff0000;
+            will-change: transform;
+            animation: heartBeat linear forwards;
+            text-shadow: 0 0 5px white; /* Increased shadow for better visibility behind cards */
+            filter: brightness(1.2); /* Make hearts brighter */
+        }
+
+        /* Add styles to ensure movie cards are visible above hearts */
+        .movie-card {
+            position: relative; /* Ensure the z-index works */
+            z-index: 1; /* Higher than hearts container */
+            background-color: white; /* Ensure background is opaque */
         }
     </style>
     <script>
@@ -19,38 +77,81 @@
             const mailtoUrl = "mailto:" + email + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
             window.location.href = mailtoUrl;
         }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create container for hearts
+            const heartsContainer = document.createElement('div');
+            heartsContainer.className = 'hearts-container';
+            document.body.appendChild(heartsContainer);
+            
+            // Function to create a heart
+            function createHeart() {
+                const heart = document.createElement('div');
+                heart.className = 'floating-heart';
+                heart.innerHTML = '❤️';
+                
+                // Random size between 20px and 60px
+                const size = Math.floor(Math.random() * 40) + 20;
+                heart.style.fontSize = `${size}px`;
+                
+                // Random position across the entire screen
+                const top = Math.floor(Math.random() * 100);
+                const left = Math.floor(Math.random() * 100);
+                heart.style.top = `${top}%`;
+                heart.style.left = `${left}%`;
+                
+                // Random animation duration between 3s and 8s
+                const duration = Math.floor(Math.random() * 5) + 3;
+                heart.style.animationDuration = `${duration}s`;
+                
+                heartsContainer.appendChild(heart);
+                
+                // Remove heart after animation completes
+                setTimeout(() => {
+                    heart.remove();
+                }, duration * 1000);
+            }
+            
+            // Create heart every 400ms
+            setInterval(createHeart, 400);
+            
+            // Create initial hearts
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => createHeart(), i * 150);
+            }
+        });
     </script>
 </head>
 <body class="bg-gray-100">
     <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-semibold text-center text-gray-800 mb-6">❤️ Обери фільм який будемо дивитися сьогодні ❤️</h1>
+        <h1 class="text-2xl font-semibold text-center mb-6 animated-title">❤️ Обери фільм який будемо дивитися сьогодні ❤️</h1>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-white rounded-lg shadow-md p-4 flex flex-col justify-between">
+            <div class="bg-white rounded-lg shadow-md p-4 flex flex-col justify-between movie-card">
                 <h2 class="text-lg font-semibold text-gray-700 mb-2">The Gorge</h2>
                 <img src="https://upload.wikimedia.org/wikipedia/ru/c/cd/%D0%A3%D1%89%D0%B5%D0%BB%D1%8C%D0%B5_%28%D1%84%D0%B8%D0%BB%D1%8C%D0%BC%29.jpg" alt="The Gorge" class="rounded-md mb-4">
                 <button onclick="sendEmail('The Gorge')" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">Обрати The Gorge</button>
             </div>
-            <div class="bg-white rounded-lg shadow-md p-4 flex flex-col justify-between">
+            <div class="bg-white rounded-lg shadow-md p-4 flex flex-col justify-between movie-card">
                 <h2 class="text-lg font-semibold text-gray-700 mb-2">Napoleon</h2>
                 <img src="https://upload.wikimedia.org/wikipedia/uk/2/20/%D0%9D%D0%B0%D0%BF%D0%BE%D0%BB%D0%B5%D0%BE%D0%BD_2023.jpg" alt="Napoleon" class="rounded-md mb-4">
                 <button onclick="sendEmail('Napoleon')" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">Обрати Napoleon</button>
             </div>
-            <div class="bg-white rounded-lg shadow-md p-4 flex flex-col justify-between">
+            <div class="bg-white rounded-lg shadow-md p-4 flex flex-col justify-between movie-card">
                 <h2 class="text-lg font-semibold text-gray-700 mb-2">Greyhound</h2>
                 <img src="https://upload.wikimedia.org/wikipedia/uk/f/f3/Greyhound_poster.jpeg" alt="Greyhound" class="rounded-md mb-4">
                 <button onclick="sendEmail('Greyhound')" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">Обрати Greyhound</button>
             </div>
-            <div class="bg-white rounded-lg shadow-md p-4 flex flex-col justify-between">
+            <div class="bg-white rounded-lg shadow-md p-4 flex flex-col justify-between movie-card">
                 <h2 class="text-lg font-semibold text-gray-700 mb-2">Finch</h2>
                 <img src="https://upload.wikimedia.org/wikipedia/uk/4/47/Фінч_постер_фільму.jpg" alt="Finch" class="rounded-md mb-4">
                 <button onclick="sendEmail('Finch')" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">Обрати Finch</button>
             </div>
-            <div class="bg-white rounded-lg shadow-md p-4 flex flex-col justify-between">
+            <div class="bg-white rounded-lg shadow-md p-4 flex flex-col justify-between movie-card">
                 <h2 class="text-lg font-semibold text-gray-700 mb-2">Tetris</h2>
                 <img src="https://upload.wikimedia.org/wikipedia/en/b/b1/Tetris_poster.jpg" alt="Tetris" class="rounded-md mb-4">
                 <button onclick="sendEmail('Tetris')" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">Обрати Tetris</button>
             </div>
-            <div class="bg-white rounded-lg shadow-md p-4 flex flex-col justify-between">
+            <div class="bg-white rounded-lg shadow-md p-4 flex flex-col justify-between movie-card">
                 <h2 class="text-lg font-semibold text-gray-700 mb-2">Emancipation</h2>
                 <img src="https://upload.wikimedia.org/wikipedia/en/b/b3/Emancipation_Release_Poster.jpg" alt="Emancipation" class="rounded-md mb-4">
                 <button onclick="sendEmail('Emancipation')" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">Обрати Emancipation</button>
